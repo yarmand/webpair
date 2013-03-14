@@ -907,7 +907,7 @@ function load() {
 
 on(document, 'load', load);
 on(document, 'DOMContentLoaded', load);
-setTimeout(load, 200);
+setTimeout(load, 2000);
 
 /**
  * Expose

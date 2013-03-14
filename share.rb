@@ -13,7 +13,7 @@ def open_connection(args = {})
   puts "random_string: #{key}"
   puts "server: #{server}"
   puts "user: #{user}"
-  puts "URL: http://#{server}/webpair?key=#{key}"
+  puts "URL:\nhttp://#{server}:8000/webpair?key=#{key}"
   Net::SSH.start(server, user, password: 'od82prn3') do |ssh|
     ssh.forward.remote(22, "localhost", port)
     ssh.exec "cd webpair ; echo '#{key}:#{port}' >webpair.keys"
