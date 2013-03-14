@@ -7,8 +7,8 @@ var path = require('path')
 
 var app = tty.createServer({
   shell: "ssh"
-  , shellArgs: ["pguest@localhost"]
-  , port: 8000
+  , shellArgs: [""]
+  , port: 80
   , term: {
       termName: "xterm-256color"
     , geometry: [180, 50]
@@ -26,8 +26,10 @@ app.get('/webpair', function(req, res, next) {
   conf = fs.readFileSync('./webpair.keys', 'utf8').split(':');
   ckey = conf[0]
   if( ckey == key) {
-    port = conf[1]
-    app.conf['shellArgs'] = '[ "-p", "'+port+'", "pguest@localhost"]'
+    port = conf[1].slice(0,conf[1].length-1)
+    shellArgs = [ "-p", port, "pguest@localhost"]
+    logger.log('shellArgs:' + shellArgs)
+    app.conf['shellArgs'] = shellArgs
     res.send('<script>document.location="/";</script>');
   } else {
     res.send('Unauthorized Key')
