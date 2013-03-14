@@ -8,7 +8,7 @@ var path = require('path')
 var app = tty.createServer({
   shell: "ssh"
   , shellArgs: [""]
-  , port: 80
+  , port: 8000
   , term: {
       termName: "xterm-256color"
     , geometry: [180, 50]
