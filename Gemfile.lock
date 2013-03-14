@@ -1,0 +1,10 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    net-ssh (2.6.6)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  net-ssh
