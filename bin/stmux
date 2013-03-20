@@ -1,0 +1,126 @@
+#!/bin/sh
+
+SOCKET=/tmp/tmux-pair
+CONFIG=$HOME/.webpair
+VERBOSE=0
+
+if [ -f './.webpair' ] ; then
+  CONFIG='./.webpair'
+fi
+
+function show_help()
+{
+  echo "Usage: $0 [-v] [-f config_file] [-S soket] [-share]"
+  echo "   -v             : verbose"
+  echo "   -f config_file : yml config file"
+  echo "                    default is ./.webpair or ~/.webpair"
+  echo "   -S socket      : socket filename to use"
+  echo "   -share         : share local existing tmux session using a remote server"
+}
+
+function debug()
+{
+  if [ $VERBOSE -eq 1 ] ; then
+    echo $*
+  fi
+}
+
+function goto_webpair()
+{
+  # got to the project directory
+  PROG=$1
+  while [ -L $PROG ] ; do
+    PROG=`ls -l $PROG | cut -d '>' -f 2 | sed 's/^ //'`
+  done
+  WEBPAIR_DIR=`dirname $PROG`
+  debug "WEBPAIR_DIR=$WEBPAIR_DIR"
+  cd $WEBPAIR_DIR
+
+  # check if bundle is available
+  which bundle >/dev/null || NO_BUNDLE=1 && NO_BUNDLE=0
+  if [ $NO_BUNDLE -eq 1 ] ; then
+    echo "Can't find bundle. Please install it using:" 1>&2
+    echo "   gem install bundle" 1>&2
+    exit 1
+  fi
+  # install gems if necessary
+  bundle check | grep -q 'bundle install' && NEED_INSTALL=1 || NEED_INSTALL=0
+  if [ $NEED_INSTALL -eq 1 ] ; then
+    echo 'Installing some ruby gems'
+    bundle install
+  fi
+}
+
+while [[ $1 == -* ]]; do
+  case "$1" in
+    -h | --help)
+      show_help
+      exit 0
+      ;;
+    -v|--verbose)
+      VERBOSE=1
+      shift
+      ;;
+    -S)
+      shift
+      if (($# > 1)); then
+        SOCKET=$2; shift 2
+      else
+        echo "-S requires an argument" 1>&2
+        show_help
+        exit 1
+      fi ;;
+    -f)
+      if (($# > 1)); then
+        CONFIG=$2; shift 2
+        if [ ! -f $CONFIG ] ; then
+          echo "can't find config file: $CONFIG" 1>&2
+          exit 1
+        fi
+      else
+        echo "-f requires an argument" 1>&2
+        show_help
+        exit 1
+      fi ;;
+    --)
+      shift
+      TMUX_INLINE_OPTS=$#
+      break
+      ;;
+    -share)
+      shift
+      WEBSHARE=1
+      ;;
+    -*)
+      echo "invalid option: $1" 1>&2
+      show_help
+      exit 1
+      ;;
+    *)
+      show_help
+      exit 0
+      ;;
+  esac
+done
+
+debug "CONFIG=$CONFIG"
+
+if [ -f $CONFIG ] ; then
+  TMUX_CONFIG_OPTS=`grep TMUX_OPTS $CONFIG | cut -d ':' -f 2`
+fi
+
+TMUX_OPTS="$TMUX_CONFIG_OPTS $TMUX_INLINE_OPTS"
+
+debug "SOCKET=$SOCKET"
+debug "TMUX_OPTS=$TMUX_OPTS"
+
+if [ "$WEBSHARE" -eq 1 ] ; then
+  goto_webpair $0
+  bundle exec webpair.rb $CONFIG
+  exit 0
+fi
+
+tmux -S $SOCKET list-sessions || tmux -S $SOCKET new-session -d
+chmod a+w $SOCKET
+tmux -S $SOCKET $TMUX_OPTS attach
+
