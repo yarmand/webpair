@@ -1,3 +1,6 @@
 [submodule "tty.js"]
 	path = tty.js
 	url = git@github.com:yarmand/tty.js.git
+[submodule "shunit2"]
+	path = shunit2
+	url = git@github.com:zanshine/shunit2.git
