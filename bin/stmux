@@ -51,6 +51,8 @@ function goto_webpair()
   fi
 }
 
+WEBSHARE=0
+
 while [[ $1 == -* ]]; do
   case "$1" in
     -h | --help)
@@ -114,7 +116,7 @@ TMUX_OPTS="$TMUX_CONFIG_OPTS $TMUX_INLINE_OPTS"
 debug "SOCKET=$SOCKET"
 debug "TMUX_OPTS=$TMUX_OPTS"
 
-if [ "$WEBSHARE" -eq 1 ] ; then
+if [ $WEBSHARE -eq 1 ] ; then
   goto_webpair $0
   bundle exec webpair.rb $CONFIG
   exit 0
