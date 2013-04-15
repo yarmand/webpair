@@ -10,11 +10,12 @@ fi
 
 function show_help()
 {
-  echo "Usage: $0 [-v] [-f config_file] [-S soket] [-share]"
+  echo "Usage: $0 [-v] [-f config_file] [-S soket | -n name] [-share]"
   echo "   -v             : verbose"
   echo "   -f config_file : yml config file"
   echo "                    default is ./.webpair or ~/.webpair"
   echo "   -S socket      : socket filename to use"
+  echo "   -n name        : name for the session. Will use the socket /tmp/<name>.tmux"
   echo "   -share         : share local existing tmux session using a remote server"
 }
 
@@ -64,11 +65,18 @@ while [[ $1 == -* ]]; do
       shift
       ;;
     -S)
-      shift
       if (($# > 1)); then
         SOCKET=$2; shift 2
       else
-        echo "-S requires an argument" 1>&2
+        echo "-S requires a filename" 1>&2
+        show_help
+        exit 1
+      fi ;;
+    -n)
+      if (($# > 1)); then
+        SOCKET=/tmp/$2.tmux; shift 2
+      else
+        echo "-n requires a name" 1>&2
         show_help
         exit 1
       fi ;;
