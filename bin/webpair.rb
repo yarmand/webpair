@@ -21,25 +21,9 @@ def open_connection(args = {})
   puts ">>> remote webpair URL:\n\nhttp://#{server}:#{remote_port}/webpair?key=#{key}\n"
   Net::SSH.start(server, user, password: 'od82prn3') do |ssh|
     ssh.forward.remote(22, "localhost", port)
-    #installed = ssh.exec "test -d webpair && echo 'OK'"
-    #remote_install(ssh) unless installed == 'OK'
     ssh.exec "cd webpair ; echo '#{key}=#{port}:#{pguest}' >webpair.keys"
     ssh.exec "cd webpair ; node lib/app.js"
   end
-end
-
-def remote_install(ssh)
-  log '### Installing on remote host'
-  ssh.exec "cd"
-  repo = `git remote -v | grep fetch | cut -f 2`.sub(%r{.*@github.com:},'http://www.github.com/').sub(%r{\.git\b.*\n},'')
-  log "cloning webpair repository: #{repo}"
-  ssh.exec "git clone #{repo}"
-  ssh.exec "git checkout webpair"
-  log 'installing node modules'
-  ssh.exec 'cd webpair/tty.js'
-  ssh.exec 'npm install'
-  log '### Done'
-  ssh.exec "cd"
 end
 
 def random_string
