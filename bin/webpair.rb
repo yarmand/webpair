@@ -13,12 +13,13 @@ def open_connection(args = {})
   remote_port = args['remote_port']
   port = 8100 + Random.rand(100)
   pguest = args['local_guest_user'] || 'NO_USER'
+  protocol = args['use_https'] ? 'https' : 'http'
   key = random_string
   log "port: #{port}"
   log "random_string: #{key}"
   log "server: #{server}"
   log "user: #{user}"
-  puts ">>> remote webpair URL:\n\nhttp://#{server}:#{remote_port}/webpair?key=#{key}\n"
+  puts ">>> remote webpair URL:\n\n#{protocol}://#{server}:#{remote_port}/webpair?key=#{key}\n"
   Net::SSH.start(server, user, password: 'od82prn3') do |ssh|
     ssh.forward.remote(22, "localhost", port)
     #installed = ssh.exec "test -d webpair && echo 'OK'"
