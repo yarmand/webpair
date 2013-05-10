@@ -124,6 +124,7 @@ Here is an example:
   remote_user: my_remote_user
   remote_port: 8000
   local_guest_user: pguest
+  use_https: true
   TMUX_OPTS: -2
   ```
 

@@ -5,17 +5,17 @@ CONFIG=$HOME/.webpair
 VERBOSE=0
 
 if [ -f './.webpair' ] ; then
-  CONFIG='./.webpair'
+  CONFIG="`pwd`/.webpair"
 fi
 
 function show_help()
 {
-  echo "Usage: $0 [-v] [-f config_file] [-S soket | -n name] [-share]"
+  echo "Usage: $0 [-v] [-f config_file] [-S soket] [-n name] [-share]"
   echo "   -v             : verbose"
   echo "   -f config_file : yml config file"
   echo "                    default is ./.webpair or ~/.webpair"
   echo "   -S socket      : socket filename to use"
-  echo "   -n name        : name for the session. Will use the socket /tmp/<name>.tmux"
+  echo "   -n name        : name for the session"
   echo "   -share         : share local existing tmux session using a remote server"
 }
 
@@ -53,6 +53,9 @@ function goto_webpair()
 }
 
 WEBSHARE=0
+SESSION_NAME='stmux'
+
+TMUX_CMD='attach'
 
 while [[ $1 == -* ]]; do
   case "$1" in
@@ -74,7 +77,7 @@ while [[ $1 == -* ]]; do
       fi ;;
     -n)
       if (($# > 1)); then
-        SOCKET=/tmp/$2.tmux; shift 2
+        SESSION_NAME=$2; shift 2
       else
         echo "-n requires a name" 1>&2
         show_help
@@ -100,6 +103,10 @@ while [[ $1 == -* ]]; do
     -share)
       shift
       WEBSHARE=1
+      ;;
+    -l)
+      shift
+      TMUX_CMD=list-sessions
       ;;
     -*)
       echo "invalid option: $1" 1>&2
@@ -130,7 +137,17 @@ if [ $WEBSHARE -eq 1 ] ; then
   exit 0
 fi
 
-tmux -S $SOCKET list-sessions || tmux -S $SOCKET new-session -d
+TMUX="tmux -S $SOCKET"
+
+# 1st check there is a server and force it to start, to be able to make socket writable for everybody
+$TMUX list-sessions >/dev/null || $TMUX new-session -d -s $SESSION_NAME
 chmod a+w $SOCKET
-tmux -S $SOCKET $TMUX_OPTS attach
+
+if [ $TMUX_CMD = 'list-sessions' ] ; then
+  $TMUX $TMUX_CMD
+  exit 0
+fi
+
+$TMUX list-sessions | grep $SESSION_NAME && TMUX_CMD="attach -t" || TMUX_CMD="new-session -s"
+$TMUX $TMUX_OPTS $TMUX_CMD $SESSION_NAME
 
