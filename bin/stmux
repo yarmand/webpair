@@ -53,9 +53,9 @@ function goto_webpair()
 }
 
 WEBSHARE=0
-SESSION_NAME=stmux
+SESSION_NAME='stmux'
 
-TMUX_CMD='attach -t'
+TMUX_CMD='attach'
 
 while [[ $1 == -* ]]; do
   case "$1" in
@@ -107,7 +107,6 @@ while [[ $1 == -* ]]; do
     -l)
       shift
       TMUX_CMD=list-sessions
-      SESSION_NAME=''
       ;;
     -*)
       echo "invalid option: $1" 1>&2
@@ -138,9 +137,17 @@ if [ $WEBSHARE -eq 1 ] ; then
   exit 0
 fi
 
+TMUX="tmux -S $SOCKET"
+
 # 1st check there is a server and force it to start, to be able to make socket writable for everybody
-tmux -S $SOCKET list-sessions >/dev/null || tmux -S $SOCKET new-session -d
+$TMUX list-sessions >/dev/null || $TMUX new-session -d -s $SESSION_NAME
 chmod a+w $SOCKET
 
-tmux -S $SOCKET $TMUX_OPTS $TMUX_CMD $SESSION_NAME
+if [ $TMUX_CMD = 'list-sessions' ] ; then
+  $TMUX $TMUX_CMD
+  exit 0
+fi
+
+$TMUX list-sessions | grep $SESSION_NAME && TMUX_CMD="attach -t" || TMUX_CMD="new-session -s"
+$TMUX $TMUX_OPTS $TMUX_CMD $SESSION_NAME
 
