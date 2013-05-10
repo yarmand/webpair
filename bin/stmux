@@ -5,7 +5,7 @@ CONFIG=$HOME/.webpair
 VERBOSE=0
 
 if [ -f './.webpair' ] ; then
-  CONFIG='./.webpair'
+  CONFIG="`pwd`/.webpair"
 fi
 
 function show_help()

@@ -3,6 +3,9 @@
 require 'net/ssh'
 require 'yaml'
 
+
+config_file = ARGV[0]
+
 def log(str)
   puts str
 end
@@ -47,6 +50,6 @@ def random_string
   (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
 end
 
-config = YAML.load_file('../config.yml')
+config = YAML.load_file(config_file)
 open_connection(config)
 
