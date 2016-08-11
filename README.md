@@ -1,3 +1,6 @@
+# !!! Project not supporated anymore!!!
+## have a look at tmate: https://github.com/tmate-io/tmate
+
 Webpair is an attempt to make pairing easy by sharing a tmux session through a web browser.
 
 You will use a tmux session on your local machine that can be shared to
