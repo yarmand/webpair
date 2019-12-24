@@ -1,4 +1,4 @@
-# !!! Project not supporated anymore!!!
+# !!! Project not supported anymore!!!
 ## have a look at tmate: https://github.com/tmate-io/tmate
 
 ---
